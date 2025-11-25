@@ -38,7 +38,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function getUserLocation() {
+    const locationBtn = document.getElementById('get-location-btn');
+    if (locationBtn) {
+        locationBtn.addEventListener('click', () => {
+            const statusMsg = document.getElementById('status-msg');
+            statusMsg.textContent = 'Getting your location...';
+            getUserLocation({ shouldCenterMap: true });
+        });
+    }
+
+    function getUserLocation(options = {}) {
+        const {
+            shouldCenterMap = false,
+            successMessage = 'Location found. Results sorted by distance.'
+        } = options;
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -47,16 +60,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         lng: position.coords.longitude
                     };
                     updateUserMarker(userLocation.lat, userLocation.lng);
+                    if (shouldCenterMap) {
+                        map.setView([userLocation.lat, userLocation.lng], 13);
+                    }
 
                     // Update status message
                     const statusMsg = document.getElementById('status-msg');
-                    statusMsg.textContent = 'Location found. Results sorted by distance.';
+                    statusMsg.textContent = successMessage;
                     setTimeout(() => { statusMsg.textContent = ''; }, 3000);
 
-                    // Re-run search if there's a query to apply sorting
-                    if (searchInput.value) {
-                        handleSearch(searchInput.value.toLowerCase());
-                    }
+                    // Re-run search (even if empty) to apply distance sorting
+                    handleSearch(searchInput.value.toLowerCase());
                 },
                 (error) => {
                     console.log("Location access denied or error:", error);
@@ -181,24 +195,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const userLat = position.coords.latitude;
-                const userLng = position.coords.longitude;
-
-                userLocation = { lat: userLat, lng: userLng };
-                updateUserMarker(userLat, userLng);
-                map.setView([userLat, userLng], 13);
-
-                // Trigger search with empty query to just sort all by distance
-                handleSearch(searchInput.value.toLowerCase());
-
-                statusMsg.textContent = 'Found nearest properties!';
-            },
-            () => {
-                statusMsg.textContent = 'Unable to retrieve your location.';
-            }
-        );
+        getUserLocation({
+            shouldCenterMap: true,
+            successMessage: 'Found nearest properties!'
+        });
     });
 
     // Haversine Formula
