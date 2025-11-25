@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Details</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Map</a>
+
+        <div id="details-content" class="details-container">
+            <p>Loading details...</p>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const propertyId = parseInt(urlParams.get('id'));
+
+            if (!propertyId) {
+                document.getElementById('details-content').innerHTML = '<p>Property not found.</p>';
+                return;
+            }
+
+            const property = propertiesData.find(p => p.id === propertyId);
+
+            if (property) {
+                const container = document.getElementById('details-content');
+                container.innerHTML = `
+                    <img src="${property.image}" alt="${property.name}" class="details-image">
+                    <div class="details-header">
+                        <h1>${property.name}</h1>
+                        <div class="details-price">${property.price}</div>
+                    </div>
+                    <p class="property-desc">${property.description}</p>
+                    <div class="property-meta">
+                        <p><strong>Location:</strong> ${property.lat}, ${property.lng}</p>
+                    </div>
+                    <button class="btn-primary" onclick="alert('Contact agent feature coming soon!')">Contact Agent</button>
+                `;
+            } else {
+                document.getElementById('details-content').innerHTML = '<p>Property not found.</p>';
+            }
+        });
+    </script>
+</body>
+
+</html>
